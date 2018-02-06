@@ -330,12 +330,24 @@ int background_functions(
   if(pba->has_scf == _TRUE_ && pvecback[pba->index_bg_H] != 0 && pba->scf_parameters[0]*pba->H0 >= pba->threshold_scf_fluid_m_over_H*pvecback[pba->index_bg_H] && pba->fluid_scf_wanted == _TRUE_){ //We switch for fluid equations
     pba->scf_fluid = _TRUE_;
     pba->scf_kg_eq = _FALSE_;
+    printf("Inside fluid for axionquad \n");
+    printf("H is %f \n", pba->threshold_scf_fluid_m_over_H*pvecback[pba->index_bg_H]);
+    printf("m is %f \n", pba->scf_parameters[0]*pba->H0);
+    printf("Scalar field fluid? %d \n", pba->scf_fluid);
+  }
+  if(pba->has_scf == _TRUE_ && pba->scf_potential == axion && pvecback[pba->index_bg_H] != 0 && pba->scf_parameters[1]*pba->H0 >= pba->threshold_scf_fluid_m_over_H*pvecback[pba->index_bg_H] && pba->fluid_scf_wanted == _TRUE_){ //We switch for fluid equations, for axion m is now scf_parameter[1]
+    pba->scf_fluid = _TRUE_;
+    pba->scf_kg_eq = _FALSE_;     //CO 05.02.18 Adding extra if for axion potential - the mass is now scf_parameters[1]
+    printf("Inside fluid for axion \n");
+    printf("H is %f \n", pba->threshold_scf_fluid_m_over_H*pvecback[pba->index_bg_H]);
+    printf("m is %f \n", pba->scf_parameters[1]*pba->H0);
+    printf("Scalar field fluid? %d \n", pba->scf_fluid);
   }
   else{
     pba->scf_fluid = _FALSE_;
     pba->scf_kg_eq = _TRUE_;
   }
-  //printf("Scalar field? %f \n", pba->has_scf);//print_trigger
+  //print_trigger
   /* Scalar field */
   if (pba->has_scf == _TRUE_ && pba->scf_kg_eq == _TRUE_) {
     //printf("Inside scf table update\n"); //print_trigger
@@ -359,9 +371,9 @@ int background_functions(
     //divide relativistic & nonrelativistic (not very meaningful for oscillatory models)
     rho_r += 3.*pvecback[pba->index_bg_p_scf]; //field pressure contributes radiation
     rho_m += pvecback[pba->index_bg_rho_scf] - 3.* pvecback[pba->index_bg_p_scf]; //the rest contributes matter
-    // printf("here KG equation, phi: %e, phi': %e rho_scf: %e \n", pvecback_B[pba->index_bi_phi_scf], pvecback_B[pba->index_bi_phi_prime_scf], pvecback[pba->index_bg_rho_scf]);
-    //printf("3H = %e \n", 3*pvecback[pba->index_bg_H]);
-    //printf("KE = %e, V = %e \n", (phi_prime*phi_prime/(2*a*a) , V_scf(pba,phi)));
+    printf("here KG equation, phi: %e, phi': %e rho_scf: %e \n", pvecback_B[pba->index_bi_phi_scf], pvecback_B[pba->index_bi_phi_prime_scf], pvecback[pba->index_bg_rho_scf]);
+    printf("3H = %e \n", 3*pvecback[pba->index_bg_H]);
+    printf("KE = %e, V = %e \n", (phi_prime*phi_prime/(2*a*a) , V_scf(pba,phi)));
   }
   else if(pba->has_scf == _TRUE_ &&  pba->scf_fluid == _TRUE_ && pba->fluid_scf_wanted == _TRUE_){ //Assume axion has w = 0;
     phi = pvecback[pba->index_bg_phi_scf]; //phi is frozen to its last value.
@@ -373,8 +385,8 @@ int background_functions(
     p_tot += pvecback[pba->index_bg_p_scf];
     rho_r += 3.*pvecback[pba->index_bg_p_scf]; //field pressure contributes radiation
     rho_m += pvecback[pba->index_bg_rho_scf] - 3.* pvecback[pba->index_bg_p_scf]; //the rest contributes matter
-    // printf("now fluid equation %e rho %e \n",3*pvecback[pba->index_bg_H],pvecback[pba->index_bg_rho_scf]);
-    //printf("phi is %e\n rho_scf is %e \n", phi, pvecback[pba->index_bg_rho_scf]);
+    printf("now fluid equation %e rho %e \n",3*pvecback[pba->index_bg_H],pvecback[pba->index_bg_rho_scf]);
+    printf("phi is %e\n rho_scf is %e \n", phi, pvecback[pba->index_bg_rho_scf]);
 
   }
   //printf("Scalar field? %f \n", pba->has_scf); //print_trigger
