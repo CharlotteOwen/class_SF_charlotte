@@ -4752,8 +4752,8 @@ int input_get_guess(double *xguess,
         //   dxdy[index_guess] = 0.5*xguess[index_guess]; //If this is negative, the field always move to positive values as x2 = k*f1*dxdy, even if it shouldn't
         // }
         // else{
-          xguess[index_guess] = sqrt((6.0*ba.Omega0_scf)/((pow(9*ba.Omega0_g,0.75))*pow((ba.scf_parameters[1]),0.5)));
-          dxdy[index_guess] = 0.5;
+          xguess[index_guess] = 3.0*ba.scf_parameters[2]; //sqrt((6.0*ba.Omega0_scf)/((pow(9*ba.Omega0_g,0.75))*pow((ba.scf_parameters[1]),0.5)));
+          dxdy[index_guess] = xguess[index_guess]/10;//0.5*ba.scf_parameters[2];
         // }
         // printf("index 0, x = %g, dxdy = %g\n",*xguess,*dxdy);
         // printf("Used Omega_scf = %e Omega_g = %e\n", ba.Omega0_scf, ba.Omega0_g);
@@ -4822,7 +4822,7 @@ int input_find_root(double *xzero,
                     ErrorMsg errmsg){
 
   //struct background ba;       /* for cosmological background */
-  double x1, x2, f1, f2, dxdy, dx,dxtmp;
+  double x1, x2, f1, f2, dxdy, dx,dxtmp,break_iter;
   double f_a;
   int iter, iter2;
   int return_function;
@@ -4864,8 +4864,8 @@ int input_find_root(double *xzero,
     if(pfzw->scf_potential == ax_cos_cubed)f_a = pfzw->scf_parameters[1];
     else if(pfzw->scf_potential == axion)f_a = pfzw->scf_parameters[2];
     if(pfzw->do_shooting == _TRUE_){
-      // dx = dxdy; //f1*dxdy;
-      dx=0.5;
+      dx = dxdy; //f1*dxdy;
+      //dx=0.5;
       if(input_verbose>3){
         printf("axion cubed root finding \n");
         printf("dx = %e\n", dx);
@@ -4898,10 +4898,12 @@ int input_find_root(double *xzero,
             }
             dxtmp=dx/2;
             x2=x1-dxtmp;
-            while(x2<0){
+            break_iter = 0;
+            while(x2<0 && break_iter<100){
                dxtmp/=2;
                x2=x1-dxtmp;
-               printf("x2 %e\n", x2);
+               break_iter+=1;
+               printf("x2: %e, iter: %e\n", x2, break_iter);
              }
              if(input_verbose>3){
              printf("x2 is then %e \n", x2);
@@ -4923,14 +4925,16 @@ int input_find_root(double *xzero,
           else if(f1 < 0 && f1 >= -100 && ((x1+dx)/f_a>_PI_)){
           // else if(f1 < 0 && f1 >= -100){
             if(input_verbose>3){
-            printf("f1 was slightly too low, but x2 = x1 + dx goes above pi, using x2 = x1 + (dx/10) instead: %e\n", x1 + (dx/10));
+            printf("f1 was slightly too low, but x2 = x1 + dx goes above pi, using x2 = x1 + (dx/n) with n such that x2 stays below pi\n");
             }
             dxtmp=dx/2;
             x2=x1+dxtmp;
-            while(x2/f_a>_PI_){
+            break_iter=0;
+            while(x2/f_a>_PI_ && break_iter<100){
                dxtmp/=2;
                x2=x1+dxtmp;
-               printf("x2 %e\n", x2);
+               break_iter+=1;
+               printf("x2: %e, iter: %e\n", x2,break_iter);
              }
              if(input_verbose>3){
              printf("x2 is then %e \n", x2);
